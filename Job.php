@@ -76,7 +76,7 @@ class Job
      *
      * @param string $jobSpec
      *
-     * @return Yzalis\Components\
+     * @return Yzalis\Components\Crontab\Job
      */
     public function parse($jobSpec)
     {
@@ -92,7 +92,7 @@ class Job
             $jobSpec = trim(substr($jobSpec, 1));
         }
 
-        // explode job line with space
+        // a line have always 6 arguments
         $detail = explode(' ', $jobSpec, 6);
 
         // check the number of part
@@ -112,6 +112,8 @@ class Job
 
         // split the command, the log and the comments
         $comments = $log = null;
+
+        // Comments can be found after the command check if that is the case
         if ($pos = strpos($command, '#')) {
             $comments = trim(substr($command, $pos + 1));
             $command = trim(substr($command, 0, $pos));
@@ -135,7 +137,7 @@ class Job
     /**
      * Generate a unique hash related to the job entries
      *
-     * @return string
+     * @return Yzalis\Components\Crontab\Job
      */
     private function generateHash()
     {
@@ -146,7 +148,7 @@ class Job
             $this->getMonth(),
             $this->getDayOfWeek(),
             $this->getCommand(),
-            
+
         )));
 
         return $this;
@@ -182,6 +184,7 @@ class Job
             throw new \InvalidArgumentException('You must specify a command to run.');
         }
 
+        // Create / Recreate a line in the crontab
         $line = $this->getActive() ? "": "#";
         $line .= implode(" ", $this->getEntries());
 
@@ -189,9 +192,9 @@ class Job
     }
 
     /**
-     * Prepare comment
+     * Prepare comments
      *
-     * @return string
+     * @return string or null
      */
     public function prepareComments()
     {
@@ -205,7 +208,7 @@ class Job
     /**
      * Prepare log
      *
-     * @return string
+     * @return string or null
      */
     public function prepareLog()
     {
@@ -299,7 +302,7 @@ class Job
     /**
      * Return the job unique hash
      *
-     * @return string
+     * @return Job
      */
     public function getHash()
     {
