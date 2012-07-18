@@ -84,6 +84,8 @@ class Crontab
         return $content;
     }
 
+
+
     /**
      * Parse input cron file to cron entires and add them to the current object
      *
@@ -93,64 +95,107 @@ class Crontab
      */
     public function addJobsFromFile($filename)
     {
-        // parse file and retrieve valid jobs
-        $newJobs = $this->parseFile($filename);
+         // check the availability of the file
+        $path = realpath($filename);
+        if (!$path || !is_readable($path)) {
+            throw new \InvalidArgumentException(sprintf('"%s" don\'t exists or isn\'t readable', $filename));
+        }
 
-        // add new jobs to the current crontab
-        if (count($this->getJobs()) == 0) {
-            $this->setJobs($newJobs);
-        } else {
-            foreach ($newJobs as $newJob) {
-                foreach ($this->getJobs() as $job) {
-                    if ($newJob->getHash() !== $job->getHash()) {
-                        $this->addJob($newJob);
-                    }
+        $content = file_get_contents($path);
+
+        return $this->addJobsFromContent($content);
+    }
+
+    public function addJobsFromContent($content)
+    {
+        $lines = preg_split("/(\r?\n)/", $content);
+
+        if ("" == $lines) {
+            throw new \InvalidArgumentException('There is no job to parse.');
+        }
+
+        foreach ($lines as $lineno => $line) {
+            if ("" == $lines) {
+                break;
+            }
+            try {
+                $job = new Job();
+                if ($job->parse($line)) {
+                   $this->addJob($job);
                 }
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException(sprintf('Line #%d of file: "%s" is invalid. %s', $lineno, $path, $e));
             }
         }
 
         return $this;
     }
 
-    /**
-     * Parse input cron file to cron entires
-     *
-     * @param string $filename
-     */
-    public function parseFile($filename)
+    public function addJobsFromCrontab()
     {
-        // check the availability of the file
-        $path = realpath($filename);
-        if (!$path || !is_readable($path)) {
-            throw new \InvalidArgumentException(sprintf('"%s" don\'t exists or isn\'t readable', $filename));
-        }
+        $content = $this->getCurrentContabContent();
 
-        // parse every line of the file
-        $lines = file($path);
-        foreach ($lines as $lineno => $line) {
-            try {
-                $job = new Job();
-                $job->parse($line);
-                $newJobs[] = $job;
-            } catch (\Exception $e) {
-                throw new \InvalidArgumentException(sprintf('Line #%d of file: "%s" is invalid. %s', $lineno, $path, $e));
-            }
-        }
+        return $this->addJobsFromContent($content);
+    }
 
-        return $newJobs;
+    public function getCurrentContabContent()
+    {
+        exec("crontab -l > " . $this->tempFile);
+
+        $content = file_get_contents($this->tempFile);
+
+        $this->generateTempFile();
+
+        return $content;
     }
 
     /**
-     * Write the crontab to the system
-     *
-     * @param
-     *
-     * @return
+     * Insert the crontab to the system
      */
     public function write()
     {
-        $this->writeCrontabInTempFile();
+        return $this
+            ->writeContentInTempFile($this->prepareCrontabContent())
+            ->writeTempFileInCrontab()
+        ;
+    }
 
+    /**
+     * Remove all crontab content
+     * 
+     * @return Crontab
+     */
+    public function flush()
+    {
+        return $this
+            ->writeContentInTempFile("")
+            ->writeTempFileInCrontab()
+        ;
+    }
+
+    /**
+     * Write dynamic content in temporary file
+     *
+     * @param string $content
+     * 
+     * @return Crontab
+     */
+    private function writeContentInTempFile($content)
+    {
+        $this->generateTempFile();
+
+        file_put_contents($this->tempFile, $content, LOCK_EX);
+
+        return $this;
+    }
+
+    /**
+     * Write temporary file content in crontab
+     * 
+     * @return Crontab
+     */
+    public function writeTempFileInCrontab()
+    {
         $out = $this->exec($this->crontabCommand() . ' ' . $this->tempFile . ' 2>&1', $ret);
         if ($ret != 0) {
             throw new \UnexpectedValueException(
@@ -161,9 +206,30 @@ class Crontab
         return $this;
     }
 
-    private function writeCrontabInTempFile()
+    /**
+     * Prepare crontab rendering
+     * 
+     * @return string
+     */
+    private function prepareCrontabContent()
     {
-        file_put_contents($this->tempFile, $this->render(), LOCK_EX);
+        $date = new \DateTime('now', new \DateTimezone('UTC'));
+        $content = "## Auto generated crontab file by https://github.com/yzalis/crontab PHP component " . $date->format('r') . "\n\n";
+        $content .= $this->render();
+
+        $currentContent = $this->getCurrentContabContent();
+
+        if (!empty($currentContent)) {
+            $lines = preg_split("/(\r?\n)/", $currentContent);
+            $content .=  "\n" . "## BEGIN OF ORIGINAL FILE" . "\n";
+
+            foreach ($lines as $line) {
+               $content .= sprintf('## %s'."\n", $line);
+            }
+            $content .= "## END OF ORIGINAL FILE";
+        }
+
+        return $content;
     }
 
     /**
@@ -190,7 +256,7 @@ class Crontab
      *
      * @return string
      */
-    private function exec($command, & $returnVal)
+    private function exec($command, &$returnVal)
     {
         ob_start();
         system($command, $returnVal);
