@@ -34,7 +34,15 @@ You can also parse existing crontab file
 	use Yzalis\Components\Crontab\Job;
 
     $crontab = new Crontab();
-    $jobs = $crontab->parseFile($filename);
+    $crontab->addJobsFromFile($filename);
+
+You can also parse existing crontab executable
+
+	use Yzalis\Components\Crontab\Crontab;
+	use Yzalis\Components\Crontab\Job;
+
+    $crontab = new Crontab();
+    $crontab->addJobsFromCrontab();
 
 And then you can delete a job you don't want anymore:
 
