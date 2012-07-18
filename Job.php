@@ -80,17 +80,27 @@ class Job
      */
     public function parse($jobSpec)
     {
+        // check if this is a comment line
+        if (trim(empty($jobSpec)) || preg_match('/^(\#\#\ )/', $jobSpec))
+        {
+            return null;
+        }
+
+        // check if the job is innactive (commented job)
         if ("#" == substr($jobSpec, 0, 1)) {
             $this->setActive(false);
             $jobSpec = trim(substr($jobSpec, 1));
         }
 
+        // explode job line with space
         $detail = explode(' ', $jobSpec, 6);
 
+        // check the number of part
         if (count($detail) != 6) {
             throw new \InvalidArgumentException('Wrong job number of arguments.');
         }
 
+        // store every part in temporary variable
         list(
             $minute,
             $hour,
@@ -100,12 +110,14 @@ class Job
             $command
         ) = $detail;
 
+        // split the command, the log and the comments
         $comments = $log = null;
         if ($pos = strpos($command, '#')) {
             $comments = trim(substr($command, $pos + 1));
             $command = trim(substr($command, 0, $pos));
         }
 
+        // set the object
         $this
             ->setMinute($minute)
             ->setHour($hour)

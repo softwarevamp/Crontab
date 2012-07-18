@@ -16,6 +16,8 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
 
     private $job2;
 
+    private $previousContent = null;
+
     public function setUp()
     {
         $this->crontab = new Crontab();
@@ -26,6 +28,8 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
         $this->job2 = new Job();
         $this->job2->setCommand('cmd2');
         $this->job2->setActive(false);
+
+        $this->previousContent = $this->crontab->getCurrentContabContent();
     }
 
     public function testSetterGetter()
@@ -75,22 +79,38 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testWriteFile()
+    public function testFlush()
     {
-        $this->crontab->addJob($this->job1);
-        $this->assertEquals('Yzalis\Components\Crontab\Crontab', get_class($this->crontab->write()));
-        $this->crontab->removeAllJobs();
-        $this->assertEquals('Yzalis\Components\Crontab\Crontab', get_class($this->crontab->write()));
+        $this->crontab->flush();
+        $this->assertEquals('', $this->crontab->getCurrentContabContent());
     }
 
     public function testParseFile()
     {
-        $filename = __DIR__ . '/Fixtures/crontab1.txt';
-        $this->crontab->addJobsFromFile($filename);
+        $this->crontab->addJobsFromFile(__DIR__ . '/Fixtures/crontab1.txt');
         $this->assertCount(8, $this->crontab->getJobs());
+    }
 
-        $filename = __DIR__ . '/Fixtures/crontab1.txt';
-        $jobs = $this->crontab->parseFile($filename);
-        $this->assertCount(8, $jobs);
+    public function testParseContent()
+    {
+        $content = file_get_contents(__DIR__ . '/Fixtures/crontab1.txt');
+        $this->crontab->addJobsFromContent($content);
+        $this->assertCount(8, $this->crontab->getJobs());
+    }
+
+    public function testWrite()
+    {
+        $this->crontab->addJob($this->job1);
+        $this->crontab->write();
+        $this->assertStringStartsWith("## Auto", $this->crontab->getCurrentContabContent());
+    }
+
+    public function testParseExecutable()
+    {
+        $this->assertCount(0, $this->crontab->getJobs());
+        $this->crontab->addJobsFromCrontab();
+        $this->assertCount(1, $this->crontab->getJobs());
+
+        $this->crontab->flush();
     }
 }
