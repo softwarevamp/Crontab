@@ -87,13 +87,13 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
 
     public function testParseFile()
     {
-        $this->crontab->addJobsFromFile(__DIR__ . '/Fixtures/crontab1.txt');
+        $this->crontab->addJobsFromFile(__DIR__ . '/Fixtures/crontab.txt');
         $this->assertCount(8, $this->crontab->getJobs());
     }
 
     public function testParseContent()
     {
-        $content = file_get_contents(__DIR__ . '/Fixtures/crontab1.txt');
+        $content = file_get_contents(__DIR__ . '/Fixtures/crontab.txt');
         $this->crontab->addJobsFromContent($content);
         $this->assertCount(8, $this->crontab->getJobs());
     }
