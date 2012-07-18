@@ -53,6 +53,6 @@ Resources
 
 You can run the unit tests with the following command. You need to be in the crontab directory and have phpunit installed on your computer:
 
-    phpunit
+    phpunit -v
 
-Unit tests ll delete your actual crontab. Save it before testing the crontab component.
+-= WARNING =- Unit tests ll delete your actual crontab. Save it before testing the crontab component.
