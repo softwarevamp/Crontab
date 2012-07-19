@@ -12,7 +12,7 @@ $iterator = Finder::create()
 ;
 
 return new Sami($iterator, array(
-    'title'     => 'Crontab API',
+    'title'     => 'Crontab',
     'build_dir' => __DIR__ . '/../crontab-doc/%version%',
     'cache_dir' => __DIR__ . '/../crontab-doc/%version%',
     'default_opened_level' => 4,
