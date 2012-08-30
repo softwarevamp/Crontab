@@ -62,6 +62,7 @@ class Crontab
      */
     public function parseExistingCrontab()
     {
+        var_dump($this->crontabCommand());
         // parsing cron file
         $process = new Process($this->crontabCommand() . ' -l');
         $process->run();
@@ -89,11 +90,10 @@ class Crontab
      */
     protected function crontabCommand()
     {
-        $cmd = '';
+        $cmd = $this->getCrontabExecutable();
         if ($this->getUser()) {
-            $cmd .= sprintf('sudo -u %s ', $this->getUser());
+            $cmd .= sprintf(' -u %s ', $this->getUser());
         }
-        $cmd .= $this->getCrontabExecutable();
 
         return $cmd;
     }
