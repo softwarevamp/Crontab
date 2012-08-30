@@ -232,9 +232,9 @@ class Job
         }
 
         // Create / Recreate a line in the crontab
-        $line .= implode(" ", $this->getEntries());
+        $line = trim(implode(" ", $this->getEntries()));
 
-        return trim($line);
+        return $line;
     }
 
     /**
