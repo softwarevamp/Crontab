@@ -27,6 +27,13 @@ class Crontab
     public $crontabExecutable = '/usr/bin/crontab';
 
     /**
+     * The user executing the comment 'crontab'
+     *
+     * @var string
+     */
+    protected $user = null;
+
+    /**
      * The error when using the comment 'crontab'
      *
      * @var string
@@ -71,7 +78,7 @@ class Crontab
         }
 
         $this->error = $process->getErrorOutput();
-        
+
         return $this;
     }
 
