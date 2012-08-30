@@ -362,6 +362,20 @@ class Job
     }
 
     /**
+     * Return the error file content
+     *
+     * @return string
+     */
+    public function getErrorContent()
+    {
+        if ($this->getErrorFile() && file_exists($this->getErrorFile())) {
+            return file_get_contents($this->getErrorFile());
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Return the log file size
      *
      * @return string
@@ -369,6 +383,20 @@ class Job
     public function getLogSize()
     {
         return $this->logSize;
+    }
+
+    /**
+     * Return the log file content
+     *
+     * @return string
+     */
+    public function getLogContent()
+    {
+        if ($this->getLogFile() && file_exists($this->getLogFile())) {
+            return file_get_contents($this->getLogFile());
+        } else {
+            return null;
+        }
     }
 
     /**
