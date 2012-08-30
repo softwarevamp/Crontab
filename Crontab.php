@@ -161,6 +161,26 @@ class Crontab
     }
 
     /**
+     * Get crontab error
+     *
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * Get crontab output
+     *
+     * @return string
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
      * Add a new job to the crontab
      *
      * @param Yzalis\Components\Job $job
