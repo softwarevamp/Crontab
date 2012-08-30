@@ -62,7 +62,6 @@ class Crontab
      */
     public function parseExistingCrontab()
     {
-        var_dump($this->crontabCommand());
         // parsing cron file
         $process = new Process($this->crontabCommand() . ' -l');
         $process->run();
@@ -117,7 +116,7 @@ class Crontab
 
         file_put_contents($tmpFile, $this->render() . PHP_EOL);
 
-        $process = new Process($this->getCrontabExecutable() . ' ' . $tmpFile);
+        $process = new Process($this->crontabCommand() . ' ' . $tmpFile);
         $process->run();
 
         $this->error = $process->getErrorOutput();
