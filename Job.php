@@ -84,7 +84,7 @@ class Job
     /**
      * @var string
      */
-    protected $status;
+    protected $status = 'unknown';
 
     /**
      * @var $hash
@@ -175,6 +175,7 @@ class Job
             ->setLogSize($logSize)
             ->setComments($comments)
             ->setLastRunTime($lastRunTime)
+            ->setStatus($status)
         ;
 
         return $job;
@@ -342,6 +343,16 @@ class Job
     }
 
     /**
+     * Return the status
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
      * Return the comments
      *
      * @return string
@@ -349,6 +360,16 @@ class Job
     public function getComments()
     {
         return $this->comments;
+    }
+
+    /**
+     * Return error file
+     *
+     * @return string
+     */
+    public function getErrorFile()
+    {
+        return $this->errorFile;
     }
 
     /**
@@ -360,7 +381,6 @@ class Job
     {
         return $this->errorSize;
     }
-
     /**
      * Return the error file content
      *
@@ -373,6 +393,16 @@ class Job
         } else {
             return null;
         }
+    }
+
+    /**
+     * Return log file
+     *
+     * @return string
+     */
+    public function getLogFile()
+    {
+        return $this->logFile;
     }
 
     /**
@@ -421,26 +451,6 @@ class Job
         }
 
         return $this->hash;
-    }
-
-    /**
-     * Return log file
-     *
-     * @return string
-     */
-    public function getLogFile()
-    {
-        return $this->logFile;
-    }
-
-    /**
-     * Return error file
-     *
-     * @return string
-     */
-    public function getErrorFile()
-    {
-        return $this->errorFile;
     }
 
     /**
@@ -561,6 +571,20 @@ class Job
     public function setLastRunTime($lastRunTime)
     {
         $this->lastRunTime = \DateTime::createFromFormat('U', $lastRunTime);
+
+        return $this;
+    }
+
+    /**
+     * Set the status
+     *
+     * @param string
+     *
+     * @return Job
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
 
         return $this;
     }
