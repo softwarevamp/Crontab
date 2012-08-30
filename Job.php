@@ -57,19 +57,49 @@ class Job
     private $comments = null;
 
     /**
-     * @var boolean
+     * @var string
      */
-    private $active = true;
+    private $logFile = null;
 
     /**
-     * @var $log
+     * @var string
      */
-    private $log = null;
+    protected $logSize = null;
+
+    /**
+     * @var string
+     */
+    private $errorFile = null;
+
+    /**
+     * @var string
+     */
+    protected $errorSize = null;
+
+    /**
+     * @var DateTime
+     */
+    protected $lastRunTime = null;
+
+    /**
+     * @var string
+     */
+    protected $status;
 
     /**
      * @var $hash
      */
     private $hash = null;
+
+    /**
+     * To string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render();
+    }
 
     /**
      * Parse crontab line into Job object
@@ -78,60 +108,76 @@ class Job
      *
      * @return Yzalis\Components\Crontab\Job
      */
-    public function parse($jobSpec)
+    static function parse($jobLine)
     {
-        // check if this is a comment line
-        if (trim(empty($jobSpec)) || preg_match('/^(\#\#\ )/', $jobSpec))
-        {
-            return null;
-        }
-
-        // check if the job is innactive (commented job)
-        if ("#" == substr($jobSpec, 0, 1)) {
-            $this->setActive(false);
-            $jobSpec = trim(substr($jobSpec, 1));
-        }
-
-        // a line have always 6 arguments
-        $detail = explode(' ', $jobSpec, 6);
+        // split the line
+        $parts = explode(' ', $jobLine);
 
         // check the number of part
-        if (count($detail) != 6) {
+        if (count($parts) < 5) {
             throw new \InvalidArgumentException('Wrong job number of arguments.');
         }
 
-        // store every part in temporary variable
-        list(
-            $minute,
-            $hour,
-            $dayOfMonth,
-            $month,
-            $dayOfWeek,
-            $command
-        ) = $detail;
+        // analyse command
+        $command = implode(' ', array_slice($parts, 5));
 
-        // split the command, the log and the comments
-        $comments = $log = null;
+        // prepare variables 
+        $lastRunTime = $logFile = $logSize = $errorFile = $errorSize = $comments = null;
 
-        // Comments can be found after the command check if that is the case
-        if ($pos = strpos($command, '#')) {
-            $comments = trim(substr($command, $pos + 1));
-            $command = trim(substr($command, 0, $pos));
+        // extract comment
+        if (strpos($command, '#')) {
+            list($command, $comment) = explode('#', $command);
+            $comments = trim($comment);
         }
 
-        // set the object
-        $this
-            ->setMinute($minute)
-            ->setHour($hour)
-            ->setDayOfMonth($dayOfMonth)
-            ->setMonth($month)
-            ->setDayOfWeek($dayOfWeek)
+        // extract error file
+        if (strpos($command, '2>')) {
+            list($command, $errorFile) = explode('2>', $command);
+            $errorFile = trim($errorFile);
+        }
+
+        // extract log file
+        if (strpos($command, '>')) {
+            list($command, $logFile) = explode('>', $command);
+            $logFile = trim($logFile);
+        }
+
+        // compute last run time, and file size
+        if (isset($logFile) && file_exists($logFile)) {
+            $lastRunTime = filemtime($logFile);
+            $logSize = filesize($logFile);
+        }
+        if (isset($errorFile) && file_exists($errorFile)) {
+            $lastRunTime = max($lastRunTime ? : 0, filemtime($errorFile));
+            $errorSize = filesize($errorFile);
+        }
+
+        // compute status
+        $status = 'error';
+        if ($logSize === null && $errorSize === null) {
+            $status = 'unknown';
+        } else if ($errorSize === null || $errorSize == 0) {
+            $status =  'success';
+        }
+
+        // set the Job object
+        $job = new Job();
+        $job
+            ->setMinute($parts[0])
+            ->setHour($parts[1])
+            ->setDayOfMonth($parts[2])
+            ->setMonth($parts[3])
+            ->setDayOfWeek($parts[4])
             ->setCommand($command)
-            ->setLog($log)
+            ->setErrorFile($errorFile)
+            ->setErrorSize($errorSize)
+            ->setLogFile($logFile)
+            ->setLogSize($logSize)
             ->setComments($comments)
+            ->setLastRunTime($lastRunTime)
         ;
 
-        return $this->generateHash();
+        return $job;
     }
 
     /**
@@ -169,6 +215,7 @@ class Job
             $this->getDayOfWeek(),
             $this->getCommand(),
             $this->prepareLog(),
+            $this->prepareError(),
             $this->prepareComments(),
         );
     }
@@ -185,10 +232,9 @@ class Job
         }
 
         // Create / Recreate a line in the crontab
-        $line = $this->getActive() ? "": "#";
         $line .= implode(" ", $this->getEntries());
 
-        return $line . "\n";
+        return trim($line);
     }
 
     /**
@@ -212,8 +258,24 @@ class Job
      */
     public function prepareLog()
     {
-        if (null !== $this->getLog()) {
-            return '> ' . $this->getLog();
+        if (null !== $this->getLogFile()) {
+            return '> ' . $this->getLogFile();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Prepare log
+     *
+     * @return string or null
+     */
+    public function prepareError()
+    {
+        if (null !== $this->getErrorFile()) {
+            return '2> ' . $this->getErrorFile();
+        } else if ($this->prepareLog()) {
+            return '2>&1';
         } else {
             return null;
         }
@@ -290,13 +352,33 @@ class Job
     }
 
     /**
-     * Return the active status
+     * Return the error file size
      *
-     * @return boolean
+     * @return string
      */
-    public function getActive()
+    public function getErrorSize()
     {
-        return $this->active;
+        return $this->errorSize;
+    }
+
+    /**
+     * Return the log file size
+     *
+     * @return string
+     */
+    public function getLogSize()
+    {
+        return $this->logSize;
+    }
+
+    /**
+     * Return the last job run time
+     *
+     * @return DateTime|null
+     */
+    public function getLastRunTime()
+    {
+        return $this->lastRunTime;
     }
 
     /**
@@ -314,13 +396,23 @@ class Job
     }
 
     /**
-     * Return log path
+     * Return log file
      *
      * @return string
      */
-    public function getLog()
+    public function getLogFile()
     {
-        return $this->log;
+        return $this->logFile;
+    }
+
+    /**
+     * Return error file
+     *
+     * @return string
+     */
+    public function getErrorFile()
+    {
+        return $this->errorFile;
     }
 
     /**
@@ -432,17 +524,73 @@ class Job
     }
 
     /**
-     * Set the log file path
+     * Set the last job run time
+     *
+     * @param int
+     *
+     * @return Job
+     */
+    public function setLastRunTime($lastRunTime)
+    {
+        $this->lastRunTime = \DateTime::createFromFormat('U', $lastRunTime);
+
+        return $this;
+    }
+
+    /**
+     * Set the log file
      *
      * @param string
      *
      * @return Job
      */
-    public function setLog($log)
+    public function setLogFile($logFile)
     {
-        $this->log = $log;
+        $this->logFile = $logFile;
 
         return $this->generateHash();
+    }
+
+    /**
+     * Set the log file size
+     *
+     * @param string
+     *
+     * @return Job
+     */
+    public function setLogSize($logSize)
+    {
+        $this->logSize = $logSize;
+
+        return $this;
+    }
+
+    /**
+     * Set the error file
+     *
+     * @param string
+     *
+     * @return Job
+     */
+    public function setErrorFile($errorFile)
+    {
+        $this->errorFile = $errorFile;
+
+        return $this->generateHash();
+    }
+
+    /**
+     * Set the error file size
+     *
+     * @param string
+     *
+     * @return Job
+     */
+    public function setErrorSize($errorSize)
+    {
+        $this->errorSize = $errorSize;
+
+        return $this;
     }
 
     /**
@@ -460,24 +608,6 @@ class Job
 
         $this->comments = $comments;
 
-        return $this->generateHash();
-    }
-
-    /**
-     * Set the active status
-     *
-     * @param boolean
-     *
-     * @return Job
-     */
-    public function setActive($active)
-    {
-        if (!is_bool($active)) {
-            throw new \InvalidArgumentException("setActive must receive a boolean");
-        }
-
-        $this->active = $active;
-
-        return $this->generateHash();
+        return $this;
     }
 }

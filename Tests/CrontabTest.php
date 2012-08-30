@@ -16,20 +16,15 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
 
     private $job2;
 
-    private $previousContent = null;
-
     public function setUp()
     {
         $this->crontab = new Crontab();
-
+var_dump($this->crontab->render());
         $this->job1 = new Job();
         $this->job1->setCommand('cmd');
 
         $this->job2 = new Job();
         $this->job2->setCommand('cmd2');
-        $this->job2->setActive(false);
-
-        $this->previousContent = $this->crontab->getCurrentContabContent();
     }
 
     public function testSetterGetter()
@@ -40,10 +35,6 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $this->crontab->getJobs());
         $this->crontab->setJobs(array($this->job1, $this->job2));
         $this->assertCount(2, $this->crontab->getJobs());
-
-        $this->assertEquals("", $this->crontab->getMailto());
-        $this->assertEquals("contact@yzalis.com", $this->crontab->setMailto('contact@yzalis.com')->getMailto());
-        $this->assertStringStartsWith("MAILTO=contact@yzalis.com"."\n", $this->crontab->render());
 
         $this->crontab->removeAllJobs();
         $this->assertCount(0, $this->crontab->getJobs());
@@ -74,43 +65,8 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
             ->addJob($this->job2)
         ;
         $this->assertEquals(
-            "0 * * * * cmd  " . "\n" . "#0 * * * * cmd2  " . "\n",
+            "0 * * * * cmd" . PHP_EOL . "0 * * * * cmd2",
             $this->crontab->render()
         );
-    }
-
-    public function testFlush()
-    {
-        $this->crontab->flush();
-        $this->assertEquals('', $this->crontab->getCurrentContabContent());
-    }
-
-    public function testParseFile()
-    {
-        $this->crontab->addJobsFromFile(__DIR__ . '/Fixtures/crontab.txt');
-        $this->assertCount(8, $this->crontab->getJobs());
-    }
-
-    public function testParseContent()
-    {
-        $content = file_get_contents(__DIR__ . '/Fixtures/crontab.txt');
-        $this->crontab->addJobsFromContent($content);
-        $this->assertCount(8, $this->crontab->getJobs());
-    }
-
-    public function testWrite()
-    {
-        $this->crontab->addJob($this->job1);
-        $this->crontab->write();
-        $this->assertStringStartsWith("## Auto", $this->crontab->getCurrentContabContent());
-    }
-
-    public function testParseExecutable()
-    {
-        $this->assertCount(0, $this->crontab->getJobs());
-        $this->crontab->addJobsFromCrontab();
-        $this->assertCount(1, $this->crontab->getJobs());
-
-        $this->crontab->flush();
     }
 }
