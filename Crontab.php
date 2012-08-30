@@ -45,8 +45,18 @@ class Crontab
      */
     public function __construct()
     {
+        $this->parseExistingCrontab();
+    }
+
+    /**
+     * Parse an existing crontab
+     * 
+     * @return Crontab
+     */
+    public function parseExistingCrontab()
+    {
         // parsing cron file
-        $process = new Process('crontab -l');
+        $process = new Process($this->crontabCommand() . ' -l');
         $process->run();
         $lines = array_filter(explode(PHP_EOL, $process->getOutput()), function($line) {
             return '' != trim($line);
@@ -61,6 +71,24 @@ class Crontab
         }
 
         $this->error = $process->getErrorOutput();
+        
+        return $this;
+    }
+
+    /**
+     * Calcuates crontab command
+     *
+     * @return string
+     */
+    protected function crontabCommand()
+    {
+        $cmd = '';
+        if ($this->getUser()) {
+            $cmd .= sprintf('sudo -u %s ', $this->getUser());
+        }
+        $cmd .= $this->getCrontabExecutable();
+
+        return $cmd;
     }
 
     /**
