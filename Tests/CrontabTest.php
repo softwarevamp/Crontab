@@ -19,7 +19,7 @@ class CrontabTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->crontab = new Crontab();
-var_dump($this->crontab->render());
+
         $this->job1 = new Job();
         $this->job1->setCommand('cmd');
 
