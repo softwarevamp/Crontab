@@ -19,7 +19,6 @@ Crontab provide a php 5.3 lib to create crontab file.
 	;
 
 	$crontab = new Crontab();
-	$crontab->setMailto('your.email@email.com');
 	$crontab->addJob($job);
 
 	$crontab->write();
@@ -28,25 +27,11 @@ You can render what you have created:
 
 	echo $crontab->render();
 
-You can also parse existing crontab file
-
-	use Yzalis\Components\Crontab\Crontab;
-	use Yzalis\Components\Crontab\Job;
-
-    $crontab = new Crontab();
-    $crontab->addJobsFromFile($filename);
-
-You can also parse existing crontab executable
-
-	use Yzalis\Components\Crontab\Crontab;
-	use Yzalis\Components\Crontab\Job;
-
-    $crontab = new Crontab();
-    $crontab->addJobsFromCrontab();
-
 And then you can delete a job you don't want anymore:
 
 	$crontab->removeJob($theJobYouWantToDelete);
+
+When you create a Crontab, it will automatically parse your current crontab file and add all present job into you new object.
 
 Resources
 ---------
