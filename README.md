@@ -20,7 +20,6 @@ Crontab provide a php 5.3 lib to create crontab file.
 
 	$crontab = new Crontab();
 	$crontab->addJob($job);
-
 	$crontab->write();
 
 You can render what you have created:
@@ -31,7 +30,7 @@ And then you can delete a job you don't want anymore:
 
 	$crontab->removeJob($theJobYouWantToDelete);
 
-When you create a Crontab, it will automatically parse your current crontab file and add all present job into you new object.
+When you create a Crontab, it will automatically parse your current crontab file and add all present job into your new object.
 
 Resources
 ---------
@@ -39,5 +38,3 @@ Resources
 You can run the unit tests with the following command. You need to be in the crontab directory and have phpunit installed on your computer:
 
     phpunit -v
-
--= WARNING =- Unit tests ll delete your actual crontab. Save it before testing the crontab component.
