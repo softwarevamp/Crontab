@@ -1,8 +1,8 @@
 <?php
 
-namespace Yzalis\Components\Crontab;
+namespace Crontab;
 
-use Yzalis\Components\Crontab\Job;
+use Crontab\Job;
 use Symfony\Component\Process\Process;
 
 /**
@@ -217,7 +217,7 @@ class Crontab
     /**
      * Add a new job to the crontab
      *
-     * @param Yzalis\Components\Job $job
+     * @param Crontab\Job $job
      *
      * @return Crontab
      */

@@ -1,8 +1,0 @@
-* * * * * w > /tmp/sysload
-#1 2 3 5 1 uptime # comment
-#*/5 */2 */6 * */2 /usr/sbin/chroot /srv/user /usr/local/bin/command 2>&1 | tee -a /srv/user/var/log/mylogs/command.log #comments
-# 1-15,16-35 2,4-6,8 1-15,15-31 5 1-3,4-7 uptime # comment
-* * * * * /usr/sbin/chroot /srv/user /srv/php/bin/php /root/test.php
-0,1 3 1,6 * 0,7 /usr/sbin/chroot /srv/user /usr/local/bin/clean 2>&1 | tee -a /srv/user/var/log/mylogs/clean.log
-#55-59 0-5 6-12 * 0-7 /usr/sbin/chroot /srv/user /usr/local/bin/somestuff 2>&1 | tee -a /srv/user/var/log/mylogs/somestuff.log
-#55,56,57 0,2,10 1,4,8,12 * * /usr/sbin/chroot /srv/user /usr/local/bin/otherstuff 2>&1 | tee -a /srv/user/var/log/mylogs/otherstuff.log

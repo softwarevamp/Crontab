@@ -1,7 +1,7 @@
 <?php
 
-use Yzalis\Components\Crontab\Crontab;
-use Yzalis\Components\Crontab\Job;
+use Crontab\Crontab;
+use Crontab\Job;
 
 /**
  * JobTest

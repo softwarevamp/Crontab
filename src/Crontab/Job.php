@@ -1,6 +1,6 @@
 <?php
 
-namespace Yzalis\Components\Crontab;
+namespace Crontab;
 
 /**
  * Represent a cron job
