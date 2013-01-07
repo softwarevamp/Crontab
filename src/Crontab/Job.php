@@ -152,6 +152,8 @@ class Job
             $errorSize = filesize($errorFile);
         }
 
+        $command = trim($command);
+
         // compute status
         $status = 'error';
         if ($logSize === null && $errorSize === null) {
