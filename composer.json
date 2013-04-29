@@ -3,6 +3,7 @@
     "type": "library",
     "description": "Create, manage or delete crontab and jobs with php.",
     "keywords": ["crontab", "cron", "cron job"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Benjamin Laugueux",
