@@ -5,8 +5,8 @@ Crontab Component
 
 Crontab provide a php 5.3 lib to create crontab file.
 
-	use Yzalis\Components\Crontab\Crontab;
-	use Yzalis\Components\Crontab\Job;
+	use Crontab\Crontab;
+	use Crontab\Job;
 
 	$job = new Job();
 	$job

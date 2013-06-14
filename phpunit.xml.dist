@@ -13,17 +13,12 @@
 >
     <testsuites>
         <testsuite name="Yzalis Crontab Component Test Suite">
-            <directory>./Tests/</directory>
+            <directory>./tests/</directory>
         </testsuite>
     </testsuites>
-
     <filter>
         <whitelist>
-            <directory>./</directory>
-            <exclude>
-                <directory>./Resources</directory>
-                <directory>./Tests</directory>
-            </exclude>
+            <directory>./src/Crontab/</directory>
         </whitelist>
     </filter>
 </phpunit>
