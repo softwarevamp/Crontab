@@ -259,11 +259,11 @@ class Crontab
     /**
      * Remove a specified job in the current crontab
      *
-     * @param $job
+     * @param Job $job
      *
      * @return Crontab
      */
-    public function removeJob($job)
+    public function removeJob(Job $job)
     {
         unset($this->jobs[$job->getHash()]);
 
