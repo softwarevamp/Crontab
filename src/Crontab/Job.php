@@ -2,95 +2,15 @@
 
 namespace Crontab;
 
+use Crontab\BaseJob;
+
 /**
  * Represent a cron job
  *
  * @author Benjamin Laugueux <benjamin@yzalis.com>
  */
-class Job
+class Job extends BaseJob
 {
-    /**
-     * @var $regex
-     */
-    private $regex = array(
-        'minute'     => '/^((\*)|(\d?([-,\d?])*)|(\*\/\d?))$/',
-        'hour'       => '/^((\*)|(\d?([-,\d?])*)|(\*\/\d?))$/',
-        'dayOfMonth' => '/^((\*)|(\d?([-,\d?])*)|(\*\/\d?))$/',
-        'month'      => '/^((\*)|(\d?([-,\d?])*)|(\*\/\d?))$/',
-        'dayOfWeek'  => '/^((\*)|(\d?([-,\d?])*)|(\*\/\d?))$/',
-        'command'    => '/^(.)*$/',
-    );
-
-    /**
-     * @var string
-     */
-    private $minute = "0";
-
-    /**
-     * @var string
-     */
-    private $hour = "*";
-
-    /**
-     * @var string
-     */
-    private $dayOfMonth = "*";
-
-    /**
-     * @var string
-     */
-    private $month = "*";
-
-    /**
-     * @var string
-     */
-    private $dayOfWeek = "*";
-
-    /**
-     * @var string
-     */
-    private $command = null;
-
-    /**
-     * @var string
-     */
-    private $comments = null;
-
-    /**
-     * @var string
-     */
-    private $logFile = null;
-
-    /**
-     * @var string
-     */
-    protected $logSize = null;
-
-    /**
-     * @var string
-     */
-    private $errorFile = null;
-
-    /**
-     * @var string
-     */
-    protected $errorSize = null;
-
-    /**
-     * @var DateTime
-     */
-    protected $lastRunTime = null;
-
-    /**
-     * @var string
-     */
-    protected $status = 'unknown';
-
-    /**
-     * @var $hash
-     */
-    private $hash = null;
-
     /**
      * To string
      *
@@ -283,106 +203,6 @@ class Job
             return null;
         }
     }
-
-    /**
-     * Return the minute
-     *
-     * @return string
-     */
-    public function getMinute()
-    {
-        return $this->minute;
-    }
-
-    /**
-     * Return the hour
-     *
-     * @return string
-     */
-    public function getHour()
-    {
-        return $this->hour;
-    }
-
-    /**
-     * Return the day of month
-     *
-     * @return string
-     */
-    public function getDayOfMonth()
-    {
-        return $this->dayOfMonth;
-    }
-
-    /**
-     * Return the month
-     *
-     * @return string
-     */
-    public function getMonth()
-    {
-        return $this->month;
-    }
-
-    /**
-     * Return the day of week
-     *
-     * @return string
-     */
-    public function getDayOfWeek()
-    {
-        return $this->dayOfWeek;
-    }
-
-    /**
-     * Return the command
-     *
-     * @return string
-     */
-    public function getCommand()
-    {
-        return $this->command;
-    }
-
-    /**
-     * Return the status
-     *
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * Return the comments
-     *
-     * @return string
-     */
-    public function getComments()
-    {
-        return $this->comments;
-    }
-
-    /**
-     * Return error file
-     *
-     * @return string
-     */
-    public function getErrorFile()
-    {
-        return $this->errorFile;
-    }
-
-    /**
-     * Return the error file size
-     *
-     * @return string
-     */
-    public function getErrorSize()
-    {
-        return $this->errorSize;
-    }
     /**
      * Return the error file content
      *
@@ -395,26 +215,6 @@ class Job
         } else {
             return null;
         }
-    }
-
-    /**
-     * Return log file
-     *
-     * @return string
-     */
-    public function getLogFile()
-    {
-        return $this->logFile;
-    }
-
-    /**
-     * Return the log file size
-     *
-     * @return string
-     */
-    public function getLogSize()
-    {
-        return $this->logSize;
     }
 
     /**
@@ -464,7 +264,7 @@ class Job
      */
     public function setMinute($minute)
     {
-        if (!preg_match($this->regex['minute'], $minute)) {
+        if (!preg_match(self::$_regex['minute'], $minute)) {
             throw new \InvalidArgumentException(sprintf('Minute "%s" is incorect', $minute));
         }
 
@@ -482,7 +282,7 @@ class Job
      */
     public function setHour($hour)
     {
-        if (!preg_match($this->regex['hour'], $hour)) {
+        if (!preg_match(self::$_regex['hour'], $hour)) {
             throw new \InvalidArgumentException(sprintf('Hour "%s" is incorect', $hour));
         }
 
@@ -500,7 +300,7 @@ class Job
      */
     public function setDayOfMonth($dayOfMonth)
     {
-        if (!preg_match($this->regex['dayOfMonth'], $dayOfMonth)) {
+        if (!preg_match(self::$_regex['dayOfMonth'], $dayOfMonth)) {
             throw new \InvalidArgumentException(sprintf('DayOfMonth "%s" is incorect', $dayOfMonth));
         }
 
@@ -518,7 +318,7 @@ class Job
      */
     public function setMonth($month)
     {
-        if (!preg_match($this->regex['month'], $month)) {
+        if (!preg_match(self::$_regex['month'], $month)) {
             throw new \InvalidArgumentException(sprintf('Month "%s" is incorect', $month));
         }
 
@@ -536,7 +336,7 @@ class Job
      */
     public function setDayOfWeek($dayOfWeek)
     {
-        if (!preg_match($this->regex['dayOfWeek'], $dayOfWeek)) {
+        if (!preg_match(self::$_regex['dayOfWeek'], $dayOfWeek)) {
             throw new \InvalidArgumentException(sprintf('DayOfWeek "%s" is incorect', $dayOfWeek));
         }
 
@@ -554,7 +354,7 @@ class Job
      */
     public function setCommand($command)
     {
-        if (!preg_match($this->regex['command'], $command)) {
+        if (!preg_match(self::$_regex['command'], $command)) {
             throw new \InvalidArgumentException(sprintf('Command "%s" is incorect', $command));
         }
 
@@ -578,15 +378,19 @@ class Job
     }
 
     /**
-     * Set the status
+     * Set the comments
      *
      * @param string
      *
      * @return Job
      */
-    public function setStatus($status)
+    public function setComments($comments)
     {
-        $this->status = $status;
+        if (is_array($comments)) {
+            $comments = implode($comments, ' ');
+        }
+
+        $this->comments = $comments;
 
         return $this;
     }
@@ -606,20 +410,6 @@ class Job
     }
 
     /**
-     * Set the log file size
-     *
-     * @param string
-     *
-     * @return Job
-     */
-    public function setLogSize($logSize)
-    {
-        $this->logSize = $logSize;
-
-        return $this;
-    }
-
-    /**
      * Set the error file
      *
      * @param string
@@ -631,37 +421,5 @@ class Job
         $this->errorFile = $errorFile;
 
         return $this->generateHash();
-    }
-
-    /**
-     * Set the error file size
-     *
-     * @param string
-     *
-     * @return Job
-     */
-    public function setErrorSize($errorSize)
-    {
-        $this->errorSize = $errorSize;
-
-        return $this;
-    }
-
-    /**
-     * Set the comments
-     *
-     * @param string
-     *
-     * @return Job
-     */
-    public function setComments($comments)
-    {
-        if (is_array($comments)) {
-            $comments = implode($comments, ' ');
-        }
-
-        $this->comments = $comments;
-
-        return $this;
     }
 }
