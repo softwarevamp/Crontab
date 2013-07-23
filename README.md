@@ -3,6 +3,8 @@ Crontab Component
 
 [![Build Status](https://secure.travis-ci.org/yzalis/crontab.png?branch=master)](http://travis-ci.org/yzalis/Crontab)
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/fa7a5efd-f97d-4b0a-8c62-5610d83904c6/small.png)](https://insight.sensiolabs.com/projects/fa7a5efd-f97d-4b0a-8c62-5610d83904c6)
+
 Crontab provide a php 5.3 lib to create crontab file.
 
 	use Crontab\Crontab;
