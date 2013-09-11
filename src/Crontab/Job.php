@@ -20,8 +20,8 @@ class Job extends BaseJob
     {
         try {
             return $this->render();
-        } catch (Exception $e) {
-            return '# ' .  $e;
+        } catch (\Exception $e) {
+            return '# '.$e;
         }
     }
 
@@ -46,7 +46,7 @@ class Job extends BaseJob
         // analyse command
         $command = implode(' ', array_slice($parts, 5));
 
-        // prepare variables 
+        // prepare variables
         $lastRunTime = $logFile = $logSize = $errorFile = $errorSize = $comments = null;
 
         // extract comment

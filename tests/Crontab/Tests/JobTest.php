@@ -98,4 +98,14 @@ class JobTest extends \PHPUnit_Framework_TestCase
     {
         $this->job->render();
     }
+
+    public function testToStringException()
+    {
+        try {
+            $this->job->__toString();
+        } catch(\InvalidArgumentException $e) {
+            var_dump($e);
+            $this->fail('__toString should not raise an InvalidArgumentException');
+        }
+    }
 }
