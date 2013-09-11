@@ -56,14 +56,14 @@ class Job extends BaseJob
         }
 
         // extract error file
-        if (strpos($command, '2>')) {
-            list($command, $errorFile) = explode('2>', $command);
+        if (strpos($command, '2>>')) {
+            list($command, $errorFile) = explode('2>>', $command);
             $errorFile = trim($errorFile);
         }
 
         // extract log file
-        if (strpos($command, '>')) {
-            list($command, $logFile) = explode('>', $command);
+        if (strpos($command, '>>')) {
+            list($command, $logFile) = explode('>>', $command);
             $logFile = trim($logFile);
         }
 
@@ -187,7 +187,7 @@ class Job extends BaseJob
     public function prepareLog()
     {
         if (null !== $this->getLogFile()) {
-            return '> ' . $this->getLogFile();
+            return '>> ' . $this->getLogFile();
         } else {
             return null;
         }
@@ -201,7 +201,7 @@ class Job extends BaseJob
     public function prepareError()
     {
         if (null !== $this->getErrorFile()) {
-            return '2> ' . $this->getErrorFile();
+            return '2>> ' . $this->getErrorFile();
         } else if ($this->prepareLog()) {
             return '2>&1';
         } else {

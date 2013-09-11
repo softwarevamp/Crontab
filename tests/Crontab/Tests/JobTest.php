@@ -64,11 +64,11 @@ class JobTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull($this->job->getLogFile());
         $this->assertEquals('/cron_log', $this->job->setLogFile('/cron_log')->getLogFile());
-        $this->assertEquals('> /cron_log', $this->job->prepareLog());
+        $this->assertEquals('>> /cron_log', $this->job->prepareLog());
 
         $this->assertNull($this->job->getErrorFile());
         $this->assertEquals('/cron_error', $this->job->setErrorFile('/cron_error')->getErrorFile());
-        $this->assertEquals('2> /cron_error', $this->job->prepareError());
+        $this->assertEquals('2>> /cron_error', $this->job->prepareError());
 
         $this->assertEquals(
             array(
@@ -78,15 +78,15 @@ class JobTest extends \PHPUnit_Framework_TestCase
                 '1,10-12',
                 '0,4-7',
                 'myAmazingCommandToRun',
-                '> /cron_log',
-                '2> /cron_error',
+                '>> /cron_log',
+                '2>> /cron_error',
                 '# comment l1 comment l2'
             ),
             $this->job->getEntries()
         );
 
         $this->assertEquals(
-            '0,50-58 0,20-23 1,20-31 1,10-12 0,4-7 myAmazingCommandToRun > /cron_log 2> /cron_error # comment l1 comment l2',
+            '0,50-58 0,20-23 1,20-31 1,10-12 0,4-7 myAmazingCommandToRun >> /cron_log 2>> /cron_error # comment l1 comment l2',
             $this->job->render()
         );
     }
