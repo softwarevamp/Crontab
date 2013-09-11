@@ -24,9 +24,10 @@ class Job extends BaseJob
     /**
      * Parse crontab line into Job object
      *
-     * @param string $jobSpec
+     * @param $jobLine
      *
-     * @return Yzalis\Components\Crontab\Job
+     * @return Job
+     * @throws \InvalidArgumentException
      */
     static function parse($jobLine)
     {
@@ -106,7 +107,7 @@ class Job extends BaseJob
     /**
      * Generate a unique hash related to the job entries
      *
-     * @return Yzalis\Components\Crontab\Job
+     * @return Job
      */
     private function generateHash()
     {

@@ -3,7 +3,6 @@
 namespace Crontab;
 
 use Crontab\Job;
-use Symfony\Component\Process\Process;
 
 /**
  * Represent a crontab
@@ -13,18 +12,16 @@ use Symfony\Component\Process\Process;
 class Crontab
 {
     /**
-     * A collection of jobs
-     *
-     * @var array $jobs  Yzalis\Compoenents\Crontab\Job
+     * @var CrontabFileHandler
      */
-    private $jobs = array();
+    protected $crontabFileHandler;
 
     /**
-     * Location of the crontab executable
+     * A collection of jobs
      *
-     * @var string
+     * @var Job[] $jobs
      */
-    public $crontabExecutable = '/usr/bin/crontab';
+    private $jobs = array();
 
     /**
      * The user executing the comment 'crontab'
@@ -34,67 +31,25 @@ class Crontab
     protected $user = null;
 
     /**
-     * The error when using the comment 'crontab'
-     *
-     * @var string
-     */
-    protected $error;
-
-    /**
-     * The output when using the command 'crontab'
-     *
-     * @var string
-     */
-    protected $output;
-
-    /**
      * Constructor
      */
     public function __construct()
     {
-        $this->parseExistingCrontab();
+        $this->getCrontabFileHandler()->parseExistingCrontab($this);
     }
 
     /**
      * Parse an existing crontab
-     * 
+     *
      * @return Crontab
+     *
+     * @deprecated Please use {@see CrontabFileHandler::parseExistingCrontab()}
      */
     public function parseExistingCrontab()
     {
-        // parsing cron file
-        $process = new Process($this->crontabCommand() . ' -l');
-        $process->run();
-        $lines = array_filter(explode(PHP_EOL, $process->getOutput()), function($line) {
-            return '' != trim($line);
-        });
-
-        foreach ($lines as $lineNumber => $line) {
-            // if line is nt a comment, convert it to a cron
-            if (0 !== \strpos($line, '#', 0)) {
-                $job = Job::parse($line);
-            }
-            $this->addJob($job);
-        }
-
-        $this->error = $process->getErrorOutput();
+        $this->getCrontabFileHandler()->parseExistingCrontab($this);
 
         return $this;
-    }
-
-    /**
-     * Calcuates crontab command
-     *
-     * @return string
-     */
-    protected function crontabCommand()
-    {
-        $cmd = $this->getCrontabExecutable();
-        if ($this->getUser()) {
-            $cmd .= sprintf(' -u %s ', $this->getUser());
-        }
-
-        return $cmd;
     }
 
     /**
@@ -109,31 +64,25 @@ class Crontab
 
     /**
      * Write the current crons in the cron table
+     *
+     * @deprecated Please use {@see CrontabFileHandler::write()}
      */
     public function write()
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'cron');
-
-        file_put_contents($tmpFile, $this->render() . PHP_EOL);
-
-        $process = new Process($this->crontabCommand() . ' ' . $tmpFile);
-        $process->run();
-
-        $this->error = $process->getErrorOutput();
-        $this->output = $process->getOutput();
+        $this->getCrontabFileHandler()->write($this);
 
         return $this;
     }
 
     /**
      * Remove all crontab content
-     * 
+     *
      * @return Crontab
      */
     public function flush()
     {
         $this->removeAllJobs();
-        $this->write();
+        $this->getCrontabFileHandler()->write($this);
     }
 
     /**
@@ -164,10 +113,12 @@ class Crontab
      * Get crontab executable location
      *
      * @return string
+     *
+     * @deprecated Please use {@see CrontabFileHandler::getCrontabExecutable()}
      */
     public function getCrontabExecutable()
     {
-        return $this->crontabExecutable;
+        return $this->getCrontabFileHandler()->getCrontabExecutable();
     }
 
     /**
@@ -176,10 +127,12 @@ class Crontab
      * @param string $crontabExecutable
      *
      * @return Crontab
+     *
+     * @deprecated Please use {@see CrontabFileHandler::setCrontabExecutable()}
      */
     public function setCrontabExecutable($crontabExecutable)
     {
-        $this->crontabExecutable = $crontabExecutable;
+        $this->getCrontabFileHandler()->setCrontabExecutable($crontabExecutable);
 
         return $this;
     }
@@ -187,7 +140,7 @@ class Crontab
     /**
      * Get all crontab jobs
      *
-     * @return array An array of Yzalis\Components\Job
+     * @return Job[] An array of Job
      */
     public function getJobs()
     {
@@ -198,26 +151,30 @@ class Crontab
      * Get crontab error
      *
      * @return string
+     *
+     * @deprecated Please use {@see CrontabFileHandler::getError()}
      */
     public function getError()
     {
-        return $this->error;
+        return $this->getCrontabFileHandler()->getError();
     }
 
     /**
      * Get crontab output
      *
      * @return string
+     *
+     * @deprecated Please use {@see CrontabFileHandler::getOutput()}
      */
     public function getOutput()
     {
-        return $this->output;
+        return $this->getCrontabFileHandler()->getOutput();
     }
 
     /**
      * Add a new job to the crontab
      *
-     * @param Crontab\Job $job
+     * @param Job $job
      *
      * @return Crontab
      */
@@ -266,6 +223,34 @@ class Crontab
     public function removeJob(Job $job)
     {
         unset($this->jobs[$job->getHash()]);
+
+        return $this;
+    }
+
+    /**
+     * Returns a Crontab File Handler
+     *
+     * @return CrontabFileHandler
+     */
+    public function getCrontabFileHandler()
+    {
+        if (!$this->crontabFileHandler instanceof CrontabFileHandler) {
+            $this->crontabFileHandler = new CrontabFileHandler();
+        }
+
+        return $this->crontabFileHandler;
+    }
+
+    /**
+     * Set the Crontab File Handler
+     *
+     * @param CrontabFileHandler $command
+     *
+     * @return $this
+     */
+    public function setCrontabFileHandler(CrontabFileHandler $command)
+    {
+        $this->crontabFileHandler = $command;
 
         return $this;
     }
