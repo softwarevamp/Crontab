@@ -1,13 +1,13 @@
 {
-    "name": "yzalis/crontab",
+    "name": "softwarevamp/crontab",
     "type": "library",
     "description": "Create, manage or delete crontab and jobs with php.",
     "keywords": ["crontab", "cron", "cron job"],
     "license": "MIT",
     "authors": [
         {
-            "name": "Benjamin Laugueux",
-            "email": "benjamin@yzalis.com"
+            "name": "Revamp Software, Inc.",
+            "email": "softwarevamp@gmail.com"
         }
     ],
     "require": {
