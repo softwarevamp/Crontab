@@ -32,6 +32,16 @@ class CrontabFileHandler
      */
     protected $output;
 
+    protected $isCygwin;
+
+    /**
+     *
+     */
+    public function __construct() {
+        $this->isCygwin = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
+        $this->crontabExecutable = $this->isCygwin ? 'crontab' : $this->crontabExecutable;
+    }
+
     /**
      * Parse an existing crontab
      *
@@ -88,7 +98,7 @@ class CrontabFileHandler
     {
         $jobs = array();
 
-        $lines = array_filter(explode(PHP_EOL, $input), function($line) {
+        $lines = array_filter(explode("\n", $input), function($line) {
             return '' != trim($line);
         });
 
@@ -152,7 +162,7 @@ class CrontabFileHandler
 
         $this->writeToFile($crontab, $tmpFile);
 
-        $process = new Process($this->crontabCommand($crontab).' '.$tmpFile);
+        $process = new Process($this->isCygwin ? sprintf('cygpath %s | xargs %s', $tmpFile, $this->crontabCommand($crontab)) : $this->crontabCommand($crontab).' '.$tmpFile);
         $process->run();
 
         $this->error  = $process->getErrorOutput();
